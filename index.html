@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wienerdog — Give your AI a memory</title>
+<meta name="description" content="Persistent memory, habits, and a nightly routine for Claude Code and Codex CLI — made of nothing but files. No daemon, no server, no telemetry. MIT.">
+<link rel="canonical" href="https://getwienerdog.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://getwienerdog.com/">
+<meta property="og:title" content="Wienerdog — Give your AI a memory">
+<meta property="og:description" content="Persistent memory for Claude Code and Codex CLI — made of nothing but files. No daemon, no server, no telemetry. MIT.">
+<meta property="og:image" content="https://getwienerdog.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Wienerdog — Give your AI a memory">
+<meta name="twitter:description" content="Persistent memory for Claude Code and Codex CLI — made of nothing but files. No daemon, no server, no telemetry. MIT.">
+<meta name="twitter:image" content="https://getwienerdog.com/og.png">
+<meta name="theme-color" content="#0d0c0a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌭</text></svg>">
+<style>
+  :root { --accent: #f6a83c; --bg: #0d0c0a; --bg-raised: #12110e; --bg-tint: #100f0c; --border: #2a2721; --border-soft: #221f1a; --border-btn: #3a362e; --fg: #e9e4da; --fg-soft: #b5afa1; --fg-mute: #a8a294; --fg-dim: #8a857a; --fg-faint: #6d675b; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body { color: var(--fg); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: #ffc06a; text-decoration: underline; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  code, pre, .mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+  .wrap { max-width: 920px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+
+  header { padding: 72px 24px 88px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px; max-width: 920px; margin: 0 auto; }
+  .mascot { margin: 0; font-size: 13px; line-height: 1.35; color: var(--fg-faint); text-align: left; overflow-x: auto; max-width: 100%; }
+  .mascot b { color: var(--accent); font-weight: 400; }
+  h1 { margin: 0; font-size: clamp(40px, 7vw, 64px); font-weight: 650; letter-spacing: -0.02em; line-height: 1.08; }
+  .sub { margin: 0; max-width: 620px; font-size: 20px; color: var(--fg-mute); text-wrap: pretty; }
+
+  .terminal { width: 100%; max-width: 680px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-raised); text-align: left; overflow: hidden; }
+  .terminal-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .terminal-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--border-btn); }
+  .terminal-bar span { margin-left: auto; font-size: 12px; color: var(--fg-faint); }
+  .terminal-cmd { display: flex; align-items: center; gap: 12px; padding: 22px 18px; font-size: 16px; }
+  .terminal-cmd .prompt { color: var(--fg-faint); flex-shrink: 0; }
+  .terminal-cmd .cmd { color: var(--fg); flex-grow: 1; overflow-x: auto; white-space: nowrap; }
+  .cursor { display: inline-block; width: 9px; height: 18px; background: var(--accent); margin-left: 6px; vertical-align: text-bottom; animation: blink 1.2s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  #copy-btn { flex-shrink: 0; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; color: var(--accent); background: transparent; border: 1px solid var(--border-btn); border-radius: 5px; padding: 6px 12px; cursor: pointer; }
+  #copy-btn:hover { border-color: var(--accent); }
+
+  .dry-run { margin: -8px 0 0; font-size: 14px; color: var(--fg-dim); max-width: 560px; }
+  .dry-run code { font-size: 13px; color: #c9c3b6; background: #1a1815; padding: 2px 6px; border-radius: 4px; }
+  .trust { margin: 0; font-size: 12.5px; color: var(--fg-dim); letter-spacing: 0.02em; }
+  .gh-btn { display: inline-flex; align-items: center; gap: 8px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 14px; color: var(--fg); border: 1px solid var(--border-btn); border-radius: 6px; padding: 10px 20px; }
+  .gh-btn:hover { border-color: var(--accent); color: #fff; text-decoration: none; }
+  .gh-btn .star { color: var(--accent); }
+
+  section.steps { padding-top: 0; padding-bottom: 88px; }
+  .kicker { margin: 0 0 40px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 14px; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; }
+  .step { display: flex; flex-direction: column; gap: 10px; }
+  .step .num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; color: var(--fg-faint); }
+  .step h3 { margin: 0; font-size: 19px; font-weight: 600; color: var(--fg); }
+  .step p { margin: 0; font-size: 15.5px; color: var(--fg-mute); text-wrap: pretty; }
+  .step code { font-size: 13.5px; color: #c9c3b6; }
+
+  .manifesto { border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); background: var(--bg-tint); }
+  .manifesto-inner { max-width: 720px; margin: 0 auto; padding: 72px 24px; }
+  .manifesto h2 { margin: 0 0 20px; font-size: clamp(26px, 4vw, 34px); font-weight: 650; letter-spacing: -0.01em; }
+  .manifesto p { margin: 0; font-size: 18px; color: var(--fg-soft); text-wrap: pretty; }
+
+  .safety { max-width: 720px; margin: 0 auto; padding: 72px 24px 88px; }
+  .safety p { margin: 0 0 16px; font-size: 16.5px; color: var(--fg-soft); text-wrap: pretty; }
+  .safety p.meta { margin: 0; font-size: 14px; color: var(--fg-dim); }
+
+  footer { border-top: 1px solid var(--border-soft); }
+  .footer-inner { max-width: 920px; margin: 0 auto; padding: 32px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; }
+  .footer-inner a { color: var(--fg-mute); }
+  .footer-inner .tagline { margin-left: auto; color: var(--fg-faint); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header>
+  <pre class="mascot" aria-label="ASCII wiener dog mascot">      (\
+       \\                             ____
+        (\,--------------------------'()'------o
+         (_    _________________________ /~"
+          (_)_)                     (_)_)   <b>woof.</b></pre>
+
+  <h1>Give your AI a memory.</h1>
+
+  <p class="sub">Persistent memory, habits, and a nightly routine for Claude&nbsp;Code and Codex&nbsp;CLI — made of nothing but files.</p>
+
+  <!-- Terminal (swap .terminal-cmd for a ~16:10 install recording when ready) -->
+  <div class="terminal">
+    <div class="terminal-bar"><i></i><i></i><i></i><span class="mono">~ / anywhere</span></div>
+    <div class="terminal-cmd mono">
+      <span class="prompt">$</span>
+      <span class="cmd">npx wienerdog@latest init<span class="cursor"></span></span>
+      <button id="copy-btn" aria-label="Copy install command">copy</button>
+    </div>
+  </div>
+
+  <p class="dry-run">Prefer to look first? <code>npx wienerdog@latest init --dry-run</code> shows the plan and touches nothing.</p>
+
+  <p class="trust mono">No daemon · No server · No telemetry · MIT · uninstall removes every file</p>
+
+  <a class="gh-btn" href="https://github.com/wienerdog-ai/wienerdog"><span class="star">★</span> Star on GitHub</a>
+</header>
+
+<!-- HOW IT WORKS -->
+<section class="steps wrap">
+  <h2 class="kicker">How it works</h2>
+  <div class="grid">
+    <div class="step">
+      <span class="num">01</span>
+      <h3>Interview</h3>
+      <p>One command. Your AI interviews you and writes a real <code>CLAUDE.md</code> / <code>AGENTS.md</code> — who you are, how you work, what you care about.</p>
+    </div>
+    <div class="step">
+      <span class="num">02</span>
+      <h3>One vault, both agents</h3>
+      <p>A plain-markdown memory vault (Obsidian conventions, versioned in git) shared by Claude Code <em>and</em> Codex. Teach one, the other knows it too.</p>
+    </div>
+    <div class="step">
+      <span class="num">03</span>
+      <h3>Dreaming</h3>
+      <p>A nightly job reviews your sessions, promotes what matters into long-term memory, and turns repeated workflows into reusable skills. At most one git commit per night — everything is revertible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="manifesto-inner">
+    <h2>Just files. That's the whole trick.</h2>
+    <p>Other “personal AI” tools are apps — gateways, daemons, servers you must run and secure. Wienerdog is markdown, skills, and hooks interpreted by the AI tool you already pay for. Nothing listens, nothing phones home. It runs on your existing subscription, fully inside your provider's terms of service.</p>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<section class="safety">
+  <h2 class="kicker">Honest about safety</h2>
+  <p>Auto-written AI memory deserves skepticism. Nothing the nightly job proposes about you reaches a session until you approve the exact text. <a href="https://github.com/wienerdog-ai/wienerdog/blob/main/docs/THREAT-MODEL.md">Read the threat model →</a></p>
+  <p class="meta">Most of this codebase is written by AI agents working from written specs behind a review gate — the repo dogfoods its own product.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <a href="https://github.com/wienerdog-ai/wienerdog">GitHub</a>
+    <a href="https://www.npmjs.com/package/wienerdog">npm</a>
+    <a href="https://github.com/wienerdog-ai/wienerdog/blob/main/docs/THREAT-MODEL.md">Threat model</a>
+    <a href="https://github.com/wienerdog-ai/wienerdog/blob/main/LICENSE">MIT License</a>
+    <span class="tagline">This page is also just a file.</span>
+  </div>
+</footer>
+
+<script>
+  const btn = document.getElementById('copy-btn');
+  let t;
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText('npx wienerdog@latest init').then(() => {
+      btn.textContent = 'copied ✓';
+      clearTimeout(t);
+      t = setTimeout(() => { btn.textContent = 'copy'; }, 1600);
+    });
+  });
+</script>
+</body>
+</html>

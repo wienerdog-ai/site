@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wienerdog OG card — 1200×630</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #0d0c0a; }
+  .card { width: 1200px; height: 630px; box-sizing: border-box; background: #0d0c0a; color: #e9e4da; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: space-between; gap: 48px; padding: 72px 88px; overflow: hidden; }
+  .mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+  .left { display: flex; flex-direction: column; gap: 28px; max-width: 640px; }
+  .brand { font-size: 20px; color: #f6a83c; letter-spacing: 0.06em; }
+  h1 { margin: 0; font-size: 76px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.05; }
+  .cmd { display: inline-flex; align-items: center; gap: 14px; align-self: flex-start; border: 1px solid #2a2721; border-radius: 8px; background: #12110e; padding: 18px 24px; font-size: 24px; }
+  .cmd .prompt { color: #6d675b; }
+  .cmd .cursor { display: inline-block; width: 12px; height: 26px; background: #f6a83c; }
+  .trust { font-size: 16px; color: #8a857a; }
+  .mascot { margin: 0; flex-shrink: 0; font-size: 17px; line-height: 1.35; color: #6d675b; }
+  .mascot b { color: #f6a83c; font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="left">
+    <span class="brand mono">wienerdog</span>
+    <h1>Give your AI a&nbsp;memory.</h1>
+    <div class="cmd mono">
+      <span class="prompt">$</span>
+      <span>npx wienerdog@latest init</span>
+      <span class="cursor"></span>
+    </div>
+    <span class="trust mono">No daemon · No server · No telemetry · MIT</span>
+  </div>
+  <pre class="mascot mono" aria-label="ASCII wiener dog mascot">(\
+ \\                 ____
+  (\,--------------'()'------o
+    (_    ____________ /~"
+     (_)_)       (_)_)   <b>woof.</b></pre>
+</div>
+</body>
+</html>
